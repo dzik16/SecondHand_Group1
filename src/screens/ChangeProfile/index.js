@@ -1,45 +1,30 @@
 import {
-  View, Text, TextInput, ScrollView,
+  View, Text, TextInput, ScrollView, StyleSheet,
 } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import Icon from 'react-native-vector-icons/Feather';
-import SelectDropdown from 'react-native-select-dropdown';
-import { RectButton } from 'react-native-gesture-handler';
+import { Formik } from 'formik';
 import {
-  neutral1, neutral2, neutral3, neutral5, primaryPurple1, primaryPurple4,
+  alertDanger,
+  neutral1, neutral5, primaryPurple1, primaryPurple4,
 } from '../../constant/color';
+import { regions } from '../../constant/regions';
+import {
+  Header, InputText, InputDropdown, CustomButton, HelperText,
+} from '../../components';
+import { profileValidationSchema } from '../../utils';
 
 function ChangeProfile() {
-  const countries = [
-    'Egypt',
-    'Canada',
-    'Australia',
-    'Ireland',
-    'Brazil',
-    'England',
-    'Dubai',
-    'France',
-    'Germany',
-    'Saudi Arabia',
-    'Argentina',
-    'India',
-  ];
   return (
-    <ScrollView showsVerticalScrollIndicator={false}>
+    <ScrollView
+      nestedScrollEnabled
+      showsVerticalScrollIndicator={false}
+    >
       <View style={{
-        flex: 1, backgroundColor: neutral1, paddingTop: 24, marginBottom: 32,
+        flex: 1, backgroundColor: neutral1, paddingBottom: 32, paddingTop: 20,
       }}
       >
-        <View style={{
-          height: 52,
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-        >
-          <Icon name="arrow-left" color={primaryPurple4} size={24} style={{ position: 'absolute', left: 16 }} />
-          <Text style={{ fontFamily: 'Poppins-Medium', fontSize: 18, color: neutral5 }}>Lengkapi info akun</Text>
-        </View>
+        <Header title="Lengkapi info akun" />
         <View style={{ alignItems: 'center', marginVertical: 24 }}>
           <View style={{
             width: 112,
@@ -53,132 +38,96 @@ function ChangeProfile() {
             <Icon name="camera" color={primaryPurple4} size={32} />
           </View>
         </View>
-        <View style={{ marginHorizontal: 24 }}>
-          <Text style={{ fontFamily: 'Poppins-Regular', fontSize: 14, color: neutral5 }}>Nama*</Text>
-          <View style={{
-            borderRadius: 16,
-            borderWidth: 2,
-            borderColor: neutral2,
-            justifyContent: 'center',
-            paddingHorizontal: 16,
+        <Formik
+          validationSchema={profileValidationSchema}
+          initialValues={{
+            name: '', city: '', address: '', phone_number: '',
           }}
-          >
-            <TextInput style={{ fontFamily: 'Poppins-Regular', fontSize: 14, textAlignVertical: 'bottom' }} placeholder="Nama" />
-          </View>
-          <Text style={{
-            fontFamily: 'Poppins-Regular', fontSize: 14, color: neutral5, marginTop: 16,
-          }}
-          >
-            Kota*
-          </Text>
-          <SelectDropdown
-            data={countries}
-            onSelect={(selectedItem, index) => {
-              console.log(selectedItem, index);
-            }}
-            defaultButtonText="Pilih kota"
-            buttonTextAfterSelection={(selectedItem) => selectedItem}
-            rowTextForSelection={(item) => item}
-            buttonStyle={{
-              borderRadius: 16,
-              borderWidth: 2,
-              borderColor: neutral2,
-              backgroundColor: neutral1,
-              justifyContent: 'center',
-              paddingHorizontal: 16,
-              width: '100%',
-            }}
-            buttonTextStyle={{
-              fontFamily: 'Poppins-Regular', fontSize: 14, textAlign: 'left',
-            }}
-            renderDropdownIcon={(isOpened) => <Icon name={isOpened ? 'chevron-up' : 'chevron-down'} color="#444" size={18} />}
-            dropdownIconPosition="right"
-            dropdownStyle={{ backgroundColor: neutral1 }}
-            rowStyle={{ backgroundColor: neutral1, borderBottomColor: neutral3 }}
-            rowTextStyle={{
-              fontFamily: 'Poppins-Regular', fontSize: 14, textAlign: 'left',
-            }}
-            search
-            searchInputStyle={{
-              backgroundColor: neutral1,
-              borderRadius: 16,
-              borderBottomWidth: 1,
-              borderBottomColor: neutral3,
-            }}
-            searchPlaceHolder="Cari kota"
-            searchPlaceHolderColor={neutral3}
-            renderSearchInputLeftIcon={() => <Icon name="search" color={neutral3} size={18} />}
-          />
-          <Text style={{
-            fontFamily: 'Poppins-Regular', fontSize: 14, color: neutral5, marginTop: 16,
-          }}
-          >
-            Alamat*
-          </Text>
-          <View style={{
-            borderRadius: 16,
-            borderWidth: 2,
-            borderColor: neutral2,
-            justifyContent: 'center',
-            paddingHorizontal: 16,
-          }}
-          >
-            <TextInput
-              multiline
-              style={{
-                fontFamily: 'Poppins-Regular',
-                fontSize: 14,
-                textAlignVertical: 'top',
-                height: 80,
-              }}
-              placeholder="Contoh: Jalan Ikan Hiu 33"
-            />
-          </View>
-          <Text style={{
-            fontFamily: 'Poppins-Regular', fontSize: 14, color: neutral5, marginTop: 16,
-          }}
-          >
-            No Handphone*
-          </Text>
-          <View style={{
-            borderRadius: 16,
-            borderWidth: 2,
-            borderColor: neutral2,
-            justifyContent: 'center',
-            paddingHorizontal: 16,
-          }}
-          >
-            <TextInput
-              style={{
-                fontFamily: 'Poppins-Regular',
-                fontSize: 14,
-                textAlignVertical: 'bottom',
-              }}
-              placeholder="contoh: +628123456789"
-            />
-          </View>
-          <RectButton style={{
-            height: 48,
-            width: '100%',
-            alignItems: 'center',
-            alignContent: 'center',
-            paddingVertical: 12,
-            backgroundColor: primaryPurple4,
-            borderRadius: 12,
-            marginTop: 24,
-          }}
-          >
-            <Text style={{
-              fontFamily: 'Poppins-Medium', fontSize: 16, color: neutral1, marginLeft: 8, textAlignVertical: 'center',
-            }}
-            >
-              Simpan
-            </Text>
-          </RectButton>
-        </View>
+          onSubmit={(values) => console.log(values)}
+        >
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            setFieldValue,
+            values,
+            errors,
+            isValid,
+            dirty,
+            touched,
+            isSubmitting,
+          }) => (
+            <View style={{ marginHorizontal: 24 }}>
+              <Text style={styles.inputLabel}>Nama*</Text>
+              <InputText
+                placeholder="Nama"
+                name="name"
+                onChangeText={handleChange('name')}
+                onBlur={handleBlur('name')}
+                error={touched.name && errors.name}
+                value={values.name}
+                type="email-address"
+              />
+              {touched.name && errors.name && (
+                <HelperText text={errors.name} />
+              )}
+
+              <Text style={styles.inputLabel}>Kota*</Text>
+              <InputDropdown
+                data={regions}
+                city={setFieldValue}
+                value={values.city}
+                name="city"
+              />
+              { touched.city && errors.city && (
+                <HelperText text={errors.city} />
+              )}
+
+              <Text style={styles.inputLabel}>Alamat*</Text>
+              <InputText
+                name="address"
+                onChangeText={handleChange('address')}
+                onBlur={handleBlur('address')}
+                error={touched.address && errors.address}
+                value={values.address}
+                placeholder="Contoh: Jalan Ikan Hiu 33"
+                style={{ textAlignVertical: 'top', height: 80 }}
+              />
+              { touched.address && errors.address && (
+                <HelperText text={errors.address} />
+              )}
+              <Text style={styles.inputLabel}>No Handphone*</Text>
+              <InputText
+                name="phone_number"
+                onChangeText={handleChange('phone_number')}
+                onBlur={handleBlur('phone_number')}
+                error={touched.phone_number && errors.phone_number}
+                value={values.phone_number}
+                placeholder="contoh: +628123456789"
+                type="phone-pad"
+                maxLength={18}
+              />
+              { touched.phone_number && errors.phone_number && (
+              <HelperText text={errors.phone_number} />
+              )}
+              <CustomButton
+                onPress={handleSubmit}
+                title="Simpan"
+                enabled={dirty && isValid && !errors.name
+                  && !errors.city && !errors.address && !errors.phone_number}
+              />
+            </View>
+          )}
+        </Formik>
       </View>
     </ScrollView>
   );
 }
 
 export default ChangeProfile;
+
+const styles = StyleSheet.create({
+  inputLabel: {
+    fontFamily: 'Poppins-Regular', fontSize: 14, color: neutral5, marginTop: 16,
+  },
+});

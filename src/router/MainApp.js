@@ -1,7 +1,6 @@
 /* eslint-disable react/no-unstable-nested-components */
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
 import Icon from 'react-native-vector-icons/Feather';
 import { Home, Profile } from '../screens/index';
 import { primaryPurple4 } from '../constant/color';
