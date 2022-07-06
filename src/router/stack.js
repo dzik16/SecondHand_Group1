@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  Login, Register, Splash, ChangeProfile,
+  Login, Register, Splash, ChangeProfile, Product, NotLogin,
+  Success, Detail, Jual, BidderInfo, Setting, ChangePassword,
 } from '../screens/index';
 import Auth from '../service/Auth';
 import MainApp from './MainApp';
@@ -63,6 +64,12 @@ function Router() {
           component={Register}
           options={{ headerShown: false }}
         />
+
+        <Stack.Screen
+          name="Success"
+          component={Success}
+          options={{ headerShown: false }}
+        />
       </>
       )}
       <Stack.Screen
@@ -73,6 +80,41 @@ function Router() {
       <Stack.Screen
         name="ChangeProfile"
         component={ChangeProfile}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="JualFull"
+        component={Jual}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Product"
+        component={Product}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="NotLogin"
+        component={NotLogin}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Detail"
+        component={Detail}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="BidderInfo"
+        component={BidderInfo}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Setting"
+        component={Setting}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePassword}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

@@ -1,51 +1,69 @@
 import {
-  StyleSheet, Text, View, Image,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  FlatList,
 } from 'react-native';
 import React from 'react';
-import { neutral3, neutral5 } from '../../constant/color';
-import formatRupiah from '../../utils/formatCurrency';
+import { COLORS, SIZES, FONTS } from '../../constant';
+import { formatRupiah } from '../../utils/formatCurrency';
+import styles from '../../constant/styles';
 
 function ProductCard({
-  name, categories, basePrice, imageUrl,
+  name, categories, basePrice, imageUrl, style, onPress,
 }) {
   return (
-    <View style={{
-      borderRadius: 8,
-      padding: 12,
-      backgroundColor: 'white',
-      elevation: 4,
-    }}
-    >
+    <TouchableOpacity style={[styles.card, { ...style }]} onPress={onPress}>
       <Image
         style={{
-          width: 140, height: 100, backgroundColor: neutral5, borderRadius: 8,
+          width: 140,
+          height: 100,
+          backgroundColor: COLORS.neutral5,
+          borderRadius: SIZES.base,
         }}
         source={{
           uri: imageUrl,
         }}
       />
-      <Text style={{
-        fontFamily: 'Poppins-Regular', fontSize: 14, marginTop: 8, color: neutral5,
-      }}
+      <Text
+        style={[FONTS.bodyLargeRelugar, {
+          marginTop: SIZES.base,
+          color: COLORS.neutral5,
+        }]}
+        numberOfLines={1}
+        ellipsizeMode="tail"
       >
         {name}
       </Text>
-      <Text style={{
-        fontFamily: 'Poppins-Regular', fontSize: 10, color: neutral3,
-      }}
-      >
-        {categories}
-      </Text>
-      <Text style={{
-        fontFamily: 'Poppins-Regular', fontSize: 14, marginVertical: 8, color: neutral5,
-      }}
+      <FlatList
+        data={categories}
+        horizontal
+        keyExtractor={(item, index) => item.id + index.toString()}
+        renderItem={({ item }) => (
+          <Text
+            style={[FONTS.bodySmallRegular, {
+              color: COLORS.neutral3,
+            }]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {item.name}
+            {', '}
+          </Text>
+        )}
+      />
+      <Text
+        style={[FONTS.bodyNormalRegular, {
+          marginVertical: SIZES.base,
+          color: COLORS.neutral5,
+        }]}
       >
         {formatRupiah(basePrice)}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 }
 
 export default ProductCard;
-
-const styles = StyleSheet.create({});

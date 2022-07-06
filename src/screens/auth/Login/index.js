@@ -1,109 +1,137 @@
-/* eslint-disable no-unused-vars */
 import {
-  StyleSheet, Text, View, TouchableOpacity, TextInput,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Formik } from 'formik';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { loginUser } from '../../../redux/actions';
 import { loginValidationSchema } from '../../../utils';
+import {
+  InputText, CustomButton, Header, HelperText,
+} from '../../../components';
+import { COLORS, FONTS, SIZES } from '../../../constant';
 
 function Login() {
+  const { t, i18n } = useTranslation();
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const isLoading = useSelector((state) => state.global.isLoading);
 
   const onLogin = (value) => {
     dispatch(loginUser(value.email, value.password, navigation));
   };
 
   return (
-    <View style={styles.container}>
-      <Formik
-        validationSchema={loginValidationSchema}
-        initialValues={{ email: '', password: '' }}
-        onSubmit={(values) => onLogin(values)}
-      >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          values,
-          errors,
-          isValid,
-        }) => (
-          <>
-            <View style={[styles.inputContainer, { marginTop: 10 }]}>
-              <TextInput
-                name="email"
-                placeholder="Email Address"
-                style={styles.textInput}
-                onChangeText={handleChange('email')}
-                onBlur={handleBlur('email')}
-                value={values.email}
-                keyboardType="email-address"
-              />
-            </View>
-            {errors.email && (
-              <Text style={styles.errorText}>{errors.email}</Text>
-            )}
-
-            <View style={[styles.inputContainer, { marginTop: 10 }]}>
-              <TextInput
-                style={styles.textInput}
-                name="password"
-                placeholder="Password"
-                onChangeText={handleChange('password')}
-                onBlur={handleBlur('password')}
-                value={values.password}
-                secureTextEntry
-              />
-            </View>
-            {errors.password && (
-              <Text style={styles.errorText}>
-                {errors.password}
-              </Text>
-            )}
-
-            <TouchableOpacity
-              onPress={handleSubmit}
-              style={styles.btn}
-              disabled={!isValid}
-            >
-              <Text style={styles.btnText}>Login Now</Text>
-            </TouchableOpacity>
-            <View style={{ flexDirection: 'row', marginTop: 10 }}>
-              <Text style={{ color: '#000', marginRight: 5 }}>
-                Don&apos;t have an account?
-              </Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('Register')}
-              >
-                <Text style={{ color: '#b12441', fontWeight: 'bold' }}>
-                  Register Now
+    <ScrollView contentContainerStyle={styles.container} testID="Login">
+      <Header />
+      <View style={{ marginHorizontal: SIZES.padding5, marginTop: SIZES.padding5, flex: 1 }}>
+        <Text style={[FONTS.headingLargeBold, { color: COLORS.neutral5 }]}>{t('loginTitle')}</Text>
+        <Formik
+          validationSchema={loginValidationSchema}
+          initialValues={{ email: '', password: '' }}
+          onSubmit={(values) => onLogin(values)}
+        >
+          {({
+            handleChange,
+            handleBlur,
+            handleSubmit,
+            touched,
+            values,
+            errors,
+            isValid,
+          }) => (
+            <>
+              <View style={{ marginTop: SIZES.padding5 }}>
+                <Text style={styles.text}>
+                  {t('emailTitle')}
                 </Text>
-              </TouchableOpacity>
-            </View>
-          </>
-        )}
-      </Formik>
-    </View>
+                <InputText
+                  name="email"
+                  placeholder={t('emailPlaceholder')}
+                  style={styles.textInput}
+                  onChangeText={handleChange('email')}
+                  onBlur={handleBlur('email')}
+                  value={values.email}
+                  error={touched.email && errors.email}
+                  keyboardType="email-address"
+                />
+              </View>
+              {touched.email && errors.email && (
+              <HelperText text={t(errors.email)} />
+              )}
+
+              <View style={[styles.inputContainer, { marginTop: SIZES.padding3 }]}>
+                <Text style={styles.text}>
+                  {t('passwordTitle')}
+                </Text>
+                <InputText
+                  style={styles.textInput}
+                  name="password"
+                  placeholder={t('passwordPlaceholder')}
+                  onChangeText={handleChange('password')}
+                  onBlur={handleBlur('password')}
+                  error={touched.password && errors.password}
+                  value={values.password}
+                  secureTextEntry
+                />
+              </View>
+              {touched.password && errors.password && (
+                <HelperText text={t(errors.password)} />
+              )}
+
+              <CustomButton
+                onPress={handleSubmit}
+                title={t('loginButton')}
+                enabled={isValid && !errors.email && !errors.password}
+                buttonStyle={{ marginTop: SIZES.padding5 }}
+                isLoading={isLoading}
+              />
+            </>
+          )}
+        </Formik>
+      </View>
+      <View style={styles.goToRegister}>
+        <Text style={{ ...FONTS.bodyNormalRegular, color: COLORS.neutral5, marginRight: 5 }}>
+          {t('belumPunyaAkun')}
+        </Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Register')}
+        >
+          <Text style={{ ...FONTS.bodyNormalBold, color: COLORS.primaryPurple4 }}>
+            {t('goToRegister')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
 
 export default Login;
 
 const styles = StyleSheet.create({
-  textInput: {
-    borderWidth: 1,
+  container: {
+    flexGrow: 1,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.white,
+    paddingTop: SIZES.padding4,
   },
-  btn: {
-    borderWidth: 1,
-    padding: 5,
-    width: 90,
-    height: 40,
+  text: {
+    ...FONTS.bodyNormalRegular,
+    color: COLORS.black,
+    marginLeft: 3,
+  },
+  goToRegister: {
+    bottom: 0,
+    paddingVertical: SIZES.padding4,
+    flexDirection: 'row',
+    width: '100%',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
   },
 });
