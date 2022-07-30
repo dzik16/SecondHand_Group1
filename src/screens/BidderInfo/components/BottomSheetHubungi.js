@@ -1,7 +1,8 @@
 import {
-  ScrollView, Text, View, Image,
+  ScrollView, Text, View, Image, Linking,
 } from 'react-native';
 import React from 'react';
+import { t } from 'i18next';
 import { CustomButton } from '../../../components';
 import { COLORS, FONTS, SIZES } from '../../../constant';
 import styles from '../../../constant/styles';
@@ -19,10 +20,10 @@ export function BottomSheetHubungi(sellerDetailOrder) {
         }}
       >
         <Text style={{ color: COLORS.black, ...FONTS.bodyNormalMedium }}>
-          Yeay kamu berhasil mendapat harga yang sesuai
+          {t('bottomSheetHubungiTitle')}
         </Text>
         <Text style={{ color: COLORS.neutral3, ...FONTS.bodyNormalMedium }}>
-          Segera hubungi pembeli melalui whatsapp untuk transaksi selanjutnya
+          {t('bottomSheetHubungiText')}
         </Text>
 
         <View
@@ -31,8 +32,8 @@ export function BottomSheetHubungi(sellerDetailOrder) {
             { marginTop: SIZES.padding3, padding: SIZES.padding3 },
           ]}
         >
-          <Text style={{ ...FONTS.bodyNormalBold, textAlign: 'center' }}>
-            Product Match
+          <Text style={{ ...FONTS.bodyLargeMedium, textAlign: 'center' }}>
+            {t('productMatch')}
           </Text>
           <View
             style={{
@@ -51,7 +52,7 @@ export function BottomSheetHubungi(sellerDetailOrder) {
             </View>
             <View style={{ paddingLeft: SIZES.padding3 }}>
               <Text style={{ ...FONTS.bodyLargeMedium, color: COLORS.neutral5 }}>
-                {data?.User.full_name}
+                {data?.User?.full_name}
               </Text>
               <Text
                 style={{
@@ -59,7 +60,7 @@ export function BottomSheetHubungi(sellerDetailOrder) {
                   color: COLORS.neutral3,
                 }}
               >
-                {data?.User.city}
+                {data?.User?.city}
               </Text>
             </View>
           </View>
@@ -73,14 +74,14 @@ export function BottomSheetHubungi(sellerDetailOrder) {
             <View style={{ justifyContent: 'center' }}>
               <Image
                 source={{
-                  uri: data?.Product.image_url,
+                  uri: data?.Product?.image_url,
                 }}
                 style={{ width: 48, height: 48, borderRadius: SIZES.padding1 }}
               />
             </View>
             <View style={{ paddingLeft: SIZES.padding3 }}>
               <Text style={{ ...FONTS.bodyLargeMedium, color: COLORS.neutral5 }}>
-                {data?.Product.name}
+                {data?.Product?.name}
               </Text>
               <Text
                 style={{
@@ -89,7 +90,7 @@ export function BottomSheetHubungi(sellerDetailOrder) {
                   textDecorationLine: 'line-through',
                 }}
               >
-                {formatRupiah(data?.Product.base_price)}
+                {formatRupiah(data?.Product?.base_price)}
               </Text>
               <Text
                 style={{
@@ -97,7 +98,7 @@ export function BottomSheetHubungi(sellerDetailOrder) {
                   color: COLORS.black,
                 }}
               >
-                Ditawar
+                {t('bargained')}
                 {' '}
                 {formatRupiah(data?.price)}
               </Text>
@@ -105,9 +106,18 @@ export function BottomSheetHubungi(sellerDetailOrder) {
           </View>
         </View>
         <CustomButton
-          // onPress={handleSubmit}
+          onPress={() => {
+            const link = `whatsapp://send?text=Halo ${data?.User?.full_name}, penawaranmu untuk ${data?.Product?.name} saya terima. Gimana proses selanjutnya? &phone=62${data?.User?.phone_number}`;
+            Linking.canOpenURL(link)
+              .then((supported) => {
+                if (!supported) {
+                  Linking.openURL(`http://wa.me/62${data?.User?.phone_number}?text=Halo ${data?.User?.full_name}, penawaranmu untuk ${data?.Product?.name} saya terima. Gimana proses selanjutnya?`);
+                }
+                return Linking.openURL(link);
+              });
+          }}
           buttonStyle={{ width: '100%' }}
-          title="Hubungi Via Whatsapp"
+          title={t('whatsappButton')}
           enabled
         />
       </View>

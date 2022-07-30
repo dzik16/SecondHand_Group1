@@ -3,7 +3,7 @@ import {
   GET_PRODUCT_FAILED, GET_PRODUCT_SUCCESS,
 } from '../types';
 import { getBuyerProduct } from '../../service/Api/buyer';
-import { setLoading } from './globalAction';
+import { setLoading, setRefresh } from './globalAction';
 
 export const successGetProduct = (value) => ({
   type: GET_PRODUCT_SUCCESS,
@@ -14,12 +14,13 @@ export const failedGetProduct = () => ({
   type: GET_PRODUCT_FAILED,
 });
 
-export const getDataProduct = (url) => async (dispatch) => {
+export const getDataProduct = (props) => async (dispatch) => {
   dispatch(setLoading(true));
-  await getBuyerProduct(url)
+  await getBuyerProduct(`?status=${props?.status}&category_id=${props?.category_id}&search=${props?.search}&page=${props?.page}&per_page=${props?.per_page}`)
     .then((value) => {
-      dispatch(successGetProduct(value.data));
+      dispatch(successGetProduct(value?.data));
       dispatch(setLoading(false));
+      dispatch(setRefresh(false));
       console.log('Get data product berhasil');
     })
     .catch((err) => {

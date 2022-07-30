@@ -12,26 +12,27 @@ import {
   BottomSheetComponent,
   Header,
   Loading,
+  LoadingScreen,
   PhotoProfile,
 } from '../../components';
 import styles from '../../constant/styles';
-import { getDetailSellerOrder } from '../../redux/actions';
+import { getDetailSellerOrder, setLoading } from '../../redux/actions';
 import { putStatusSellerOrder } from '../../redux/actions/putStatusOrder';
 import { BottomSheetHubungi } from './components/BottomSheetHubungi';
 import { BottomSheetStatus } from './components/BottomSheetStatus';
+import { stringToHash } from '../../utils';
 
 function BidderInfo({ navigation, route }) {
   const { orderId } = route.params;
   const dispatch = useDispatch();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const accessToken = useSelector((state) => state.login.userData.access_token);
-  const sellerDetailOrder = useSelector(
-    (state) => state.sellerOrder.sellerDetailOrder,
-  );
+  const sellerDetailOrder = useSelector((state) => state.sellerOrder.sellerDetailOrder);
   const loading = useSelector((state) => state.global.isLoading);
 
   const [values, setValues] = useState('first');
   const [status, setStatus] = useState(false);
+  const [type, setType] = useState('');
 
   useEffect(() => {
     dispatch(getDetailSellerOrder(orderId, accessToken));
@@ -47,13 +48,19 @@ function BidderInfo({ navigation, route }) {
     const dataStatus = {
       status: value,
     };
+    dispatch(setLoading(true));
     dispatch(putStatusSellerOrder(accessToken, orderId, dataStatus));
     if (value === 'accepted') {
-      handleSnapPress(2);
+      dispatch(getDetailSellerOrder(orderId, accessToken));
+      if (!loading) {
+        setType('hubungi');
+        handleSnapPress(2);
+      }
     }
   }
 
   const onPressAfterPutStatus = (params) => {
+    setType(params);
     if (params === 'hubungi') {
       setStatus(false);
       handleSnapPress(2);
@@ -64,8 +71,9 @@ function BidderInfo({ navigation, route }) {
   };
 
   if (loading) {
-    return <Loading />;
+    <LoadingScreen />;
   }
+
   return (
     <>
       <ScrollView
@@ -80,7 +88,7 @@ function BidderInfo({ navigation, route }) {
             paddingTop: 20,
           }}
         >
-          <Header title="Info Penawar" />
+          <Header title={t('bidderInfoTitle')} />
           <View style={{ marginHorizontal: SIZES.padding5 }}>
             <View
               style={[
@@ -96,21 +104,24 @@ function BidderInfo({ navigation, route }) {
             >
               <View style={{ justifyContent: 'center' }}>
                 <PhotoProfile
-                  image={{ uri: 'https://picsum.photos/48' }}
+                  image={{ uri: sellerDetailOrder?.User?.image_url }}
                   style={{ width: 48, height: 48 }}
                   styleImage={{ width: 48, height: 48 }}
+                  disabled
                 />
               </View>
               <View style={{ paddingLeft: SIZES.padding3 }}>
                 <Text
                   style={{ ...FONTS.bodyLargeMedium, color: COLORS.neutral5 }}
                 >
-                  {sellerDetailOrder.User.full_name}
+                  {sellerDetailOrder?.status == 'pending'
+                    ? stringToHash(sellerDetailOrder?.User?.full_name)
+                    : sellerDetailOrder?.User?.full_name}
                 </Text>
                 <Text
                   style={{ ...FONTS.bodyNormalRegular, color: COLORS.neutral3 }}
                 >
-                  {sellerDetailOrder.User.city}
+                  {sellerDetailOrder?.User?.city}
                 </Text>
               </View>
             </View>
@@ -123,23 +134,26 @@ function BidderInfo({ navigation, route }) {
                 },
               ]}
             >
-              Daftar Produkmu yang Ditawar
+              {t('bidderInfoText')}
             </Text>
             <BidderCard
-              image={sellerDetailOrder.Product.image_url}
-              name={sellerDetailOrder.Product.name}
-              date={sellerDetailOrder.transaction_date}
-              price={sellerDetailOrder.Product.base_price}
-              status={sellerDetailOrder.status}
-              offeringPrice={sellerDetailOrder.price}
-              isSeen={false}
+              image={sellerDetailOrder?.Product?.image_url}
+              name={sellerDetailOrder?.Product?.name}
+              date={sellerDetailOrder?.transaction_date}
+              price={sellerDetailOrder?.Product?.base_price}
+              status={sellerDetailOrder?.status}
+              offeringPrice={sellerDetailOrder?.price}
+              productStatus={sellerDetailOrder?.Product?.status}
+              isSeen
+              disabled
+              showButton={sellerDetailOrder?.status !== 'declined' && sellerDetailOrder?.Product?.status !== 'seller'}
               onPressAccepted={
-                sellerDetailOrder.status === 'accepted'
+                sellerDetailOrder?.status === 'accepted'
                   ? () => onPressAfterPutStatus('hubungi')
                   : () => handlePutStatus('accepted')
               }
               onPressDeclined={
-                sellerDetailOrder.status === 'accepted'
+                sellerDetailOrder?.status === 'accepted'
                   ? () => onPressAfterPutStatus('status')
                   : () => handlePutStatus('declined')
               }
@@ -150,8 +164,12 @@ function BidderInfo({ navigation, route }) {
 
       <BottomSheetComponent
         sheetRef={sheetRef}
-        component={status ? BottomSheetStatus(values, setValues) : BottomSheetHubungi(sellerDetailOrder)}
+        component={status ? BottomSheetStatus(values, setValues, sellerDetailOrder?.product_id, accessToken, dispatch) : BottomSheetHubungi(sellerDetailOrder)}
+        type={type}
       />
+      {loading && (
+      <LoadingScreen />
+      )}
     </>
   );
 }

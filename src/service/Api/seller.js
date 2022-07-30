@@ -34,6 +34,12 @@ export const updateProduct = (accessToken, id, payload) => axios.put(`/seller/pr
     access_token: accessToken,
   },
 });
+export const updateStatusProduct = (accessToken, id, payload) => axios.patch(`/seller/product/${id}`, payload, {
+  headers: {
+    'Content-Type': 'multipart/form-data',
+    access_token: accessToken,
+  },
+});
 export const deleteProduct = (accessToken, id) => axios.delete(`/seller/product/${id}`, {
   headers: {
     'Content-Type': 'multipart/form-data',
@@ -57,4 +63,5 @@ export const updateSellerOrder = (accessToken, id, status) => axios.patch(`/sell
     access_token: accessToken,
   },
 });
+
 export const getSellerOrderProduct = (id) => axios.get(`/seller/order/product/${id}`);

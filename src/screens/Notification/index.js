@@ -1,94 +1,101 @@
 import {
-  StyleSheet, Text, View, Image, LogBox, FlatList,
+  StyleSheet, Text, View, Image, LogBox, FlatList, RefreshControl, ScrollView,
 } from 'react-native';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
-import { SIZES, COLORS } from '../../constant';
+import { SIZES, COLORS, FONTS } from '../../constant';
 import FocusAwareStatusBar from '../../utils/focusAwareStatusBar';
 import {
-  NotificationCard, Loading, TextHeader,
+  NotificationCard, Loading, TextHeader, LoadingScreen,
 } from '../../components';
-import { getDataNotification, patchNotifikasi } from '../../redux/actions';
+import { getDataNotification, patchNotifikasi, setRefresh } from '../../redux/actions';
 import { DiminatiNull } from '../../assets/image';
+import { SelectionImage } from '../../assets';
 
 function Notification() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const accessToken = useSelector((state) => state.login.userData.access_token);
   const notificationData = useSelector((state) => state.notifications.notifikasi);
-  const { t, i18n } = useTranslation();
+  const loading = useSelector((state) => state.global.isLoading);
+  const refresh = useSelector((state) => state.global.isRefresh);
+  const isFocused = useIsFocused();
+
+  const { t } = useTranslation();
 
   useEffect(() => {
     LogBox.ignoreLogs(['VirtualizedLists should never be nested']);
     dispatch(getDataNotification(accessToken));
     console.log('Data Notifikasi', notificationData);
-  }, []);
+  }, [isFocused]);
 
   const empty = () => (
-    <View style={{ alignItems: 'center', marginTop: 90 }}>
-      <Image source={DiminatiNull} style={{ width: 172, height: 121 }} />
-      <Text style={{ color: COLORS.neutral3, textAlign: 'center', fontSize: SIZES.h5 }}>Belum ada notifikasi nih</Text>
+    <View style={{
+      alignItems: 'center', justifyContent: 'center', marginTop: SIZES.padding5, height: SIZES.height * 0.7,
+    }}
+    >
+      <SelectionImage width={SIZES.width * 0.6} height={SIZES.width * 0.4} />
+      <Text style={{
+        color: COLORS.neutral3, textAlign: 'center', ...FONTS.bodyLargeRegular, marginTop: SIZES.padding3,
+      }}
+      >
+        {t('emptyNotification')}
+      </Text>
     </View>
   );
 
   const navigate = (status, values) => {
     if (status == 'create') {
       dispatch(patchNotifikasi(accessToken, values.id));
-      navigation.navigate('Product', { id: values.Product.id, list: true });
+      navigation.navigate('MainApp', { screen: 'DaftarJual' });
     } else {
       dispatch(patchNotifikasi(accessToken, values.id));
-      // navigation.navigate('BidderInfo', { orderId: values.id , cekId: true })
+      dispatch(getDataNotification(accessToken));
+      if (values.notification_type == 'seller') {
+        navigation.navigate('BidderInfo', { orderId: values.order_id });
+      }
     }
   };
 
-  return (
-    <View style={{
-      flex: 1, paddingHorizontal: SIZES.padding5, paddingTop: SIZES.padding5, backgroundColor: COLORS.white,
-    }}
-    >
-      <FocusAwareStatusBar barStyle="dark-content" color="white" />
-      <TextHeader text={t('notificationTitle')} />
-      <FlatList
-        data={notificationData}
-        showsVerticalScrollIndicator={false}
-        refreshing={Loading}
-        keyExtractor={(item, index) => item.id + index.toString()}
-        ListEmptyComponent={empty}
-        renderItem={({ item }) => (
-          <NotificationCard
-            image={item?.Product?.image_url}
-            name={item?.Product?.name}
-            date="20 Apr, 14:04"
-            price={item?.base_price}
-            status={item?.status}
-            offeringPrice={item?.bid_price}
-            isSeen={item?.read}
-            onPress={() => navigate(item?.status, item)}
-          />
-        )}
-      />
+  const Refresh = () => {
+    dispatch(getDataNotification(accessToken));
+  };
 
-      {/* <NotificationCard
-        image="https://picsum.photos/48"
-        name="Jam Tangan Casio"
-        date="20 Apr, 14:04"
-        price="Rp. 250.000"
-        status="bid"
-        offeringPrice="Rp. 200.000"
-        accepted
-        isSeen
-      />
-      <NotificationCard
-        image="https://picsum.photos/48"
-        name="Jam Tangan Casio"
-        date="20 Apr, 14:04"
-        price="Rp. 250.000"
-        status="post"
-        isSeen={false}
-      /> */}
-    </View>
+  return (
+    <>
+      <ScrollView
+        style={{
+          flex: 1, paddingHorizontal: SIZES.padding5, paddingTop: SIZES.padding5, backgroundColor: COLORS.white,
+        }}
+        refreshControl={
+          <RefreshControl refreshing={refresh} onRefresh={() => Refresh()} />
+      }
+      >
+        <FocusAwareStatusBar barStyle="dark-content" color="white" />
+        <TextHeader text={t('notificationTitle')} />
+        <FlatList
+          data={notificationData.sort((a, b) => a.createdAt < b.createdAt)}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={(item, index) => item.id + index.toString()}
+          ListEmptyComponent={empty}
+          renderItem={({ item }) => (
+            <NotificationCard
+              image={item?.Product?.image_url}
+              name={item?.Product?.name}
+              date={item?.createdAt}
+              price={item?.base_price}
+              status={item?.status}
+              offeringPrice={item?.bid_price}
+              isSeen={item?.read}
+              onPress={() => navigate(item?.status, item)}
+            />
+          )}
+        />
+      </ScrollView>
+      {loading && <LoadingScreen />}
+    </>
   );
 }
 

@@ -3,11 +3,22 @@ import {
 } from 'react-native';
 import React, { useState } from 'react';
 import { RadioButton } from 'react-native-paper';
+import { t } from 'i18next';
 import { CustomButton } from '../../../components';
 import styles from '../../../constant/styles';
 import { COLORS, SIZES, FONTS } from '../../../constant';
+import { patchStatusProduct } from '../../../redux/actions/pushProductStatus';
+import { getDetailSellerOrder } from '../../../redux/actions';
 
-export function BottomSheetStatus(value, setValue) {
+export function BottomSheetStatus(value, setValue, productId, accessToken, dispatch) {
+  const submitUpdate = (productStatus) => {
+    const data = {
+      status: productStatus,
+    };
+    dispatch(patchStatusProduct(accessToken, productId, data));
+    dispatch(getDetailSellerOrder(productId, accessToken));
+  };
+
   return (
     <ScrollView
       style={{
@@ -23,34 +34,36 @@ export function BottomSheetStatus(value, setValue) {
           fontWeight: '500',
         }}
       >
-        Perbarui status penjualan produkmu
+        {t('bottomSheetStatusTitle')}
       </Text>
-
       <View style={{ marginTop: SIZES.padding5 }}>
         <RadioButton.Group
           onValueChange={(newValue) => setValue(newValue)}
           value={value}
         >
-          <View style={{ flexDirection: 'row' }}>
-            <RadioButton value="firts" />
+          <View style={{ flexDirection: 'row', marginHorizontal: SIZES.base }}>
+            <View style={{ height: 10 }}>
+              <RadioButton value="seller" color={COLORS.primaryPurple4} />
+            </View>
             <View style={{ marginLeft: SIZES.padding4 }}>
               <Text
                 style={{
                   textAlignVertical: 'center',
                   ...FONTS.bodyNormalMedium,
                   color: COLORS.black,
-                  fontWeight: '400',
                 }}
               >
-                Berhasil Terjual
+                {t('successSoldTitle')}
               </Text>
               <Text style={{ ...FONTS.bodyNormalMedium }}>
-                Kamu telah sepakat menjual produk ini kepada pembeli
+                {t('successSoldText')}
               </Text>
             </View>
           </View>
-          <View style={{ flexDirection: 'row', marginTop: SIZES.padding5 }}>
-            <RadioButton value="second" />
+          <View style={{ flexDirection: 'row', marginTop: SIZES.padding5, marginHorizontal: SIZES.base }}>
+            <View style={{ height: 10 }}>
+              <RadioButton value="available" color={COLORS.primaryPurple4} />
+            </View>
             <View style={{ marginLeft: SIZES.padding4 }}>
               <Text
                 style={{
@@ -60,19 +73,19 @@ export function BottomSheetStatus(value, setValue) {
                   fontWeight: '400',
                 }}
               >
-                Batalkan transaksi
+                {t('cancelSoldTitle')}
               </Text>
               <Text style={{ ...FONTS.bodyNormalMedium }}>
-                Kamu membatalkan transaksi produk ini dengan pembeli
+                {t('cancelSoldText')}
               </Text>
             </View>
           </View>
         </RadioButton.Group>
       </View>
       <CustomButton
-        // onPress={handleSubmit}
+        onPress={() => submitUpdate(value)}
         buttonStyle={{ width: '100%', marginTop: 15 }}
-        title="Kirim"
+        title={t('sendButton')}
         enabled
       />
     </ScrollView>

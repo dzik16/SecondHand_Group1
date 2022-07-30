@@ -11,17 +11,24 @@ import { regions } from '../../constant/regions';
 import {
   Header, InputText, InputDropdown, CustomButton, HelperText, PhotoProfile, Loading, LoadingScreen,
 } from '../../components';
-import { profileValidationSchema } from '../../utils';
+import { profileValidationSchema, showInfo } from '../../utils';
 import { getDataProfile } from '../../redux/actions/getDataProfile';
 import { putDataProfile } from '../../redux/actions/pushDataProfile';
 import { Avatar } from '../../assets';
 
-function ChangeProfile({ navigation }) {
+function ChangeProfile({ navigation, route }) {
   const { t } = useTranslation();
   const profileData = useSelector((state) => state.profile.profileData);
   const accessToken = useSelector((state) => state.login.userData.access_token);
   const isLoading = useSelector((state) => state.global.isLoading);
   const dispatch = useDispatch();
+  const { data } = route.params;
+
+  useEffect(() => {
+    if (!data) {
+      showInfo(t('profileDataNotComplete'));
+    }
+  }, []);
 
   const onUpdate = async (values) => {
     const formdata = new FormData();
@@ -44,12 +51,13 @@ function ChangeProfile({ navigation }) {
     <>
       <ScrollView
         showsVerticalScrollIndicator={false}
+        style={{ backgroundColor: COLORS.neutral1 }}
       >
         <View style={{
-          backgroundColor: COLORS.neutral1, paddingBottom: SIZES.padding6, paddingTop: 20,
+          backgroundColor: COLORS.neutral1, marginBottom: SIZES.padding5, paddingTop: 20, height: SIZES.height,
         }}
         >
-          <Header title={t('changeProfileTitle')} />
+          <Header title={!data ? t('completeProfileTitle') : t('changeProfileTitle')} />
           <Formik
             validationSchema={profileValidationSchema}
             initialValues={{
@@ -75,7 +83,7 @@ function ChangeProfile({ navigation }) {
                 <View style={{ marginVertical: SIZES.padding5 }}>
                   <PhotoProfile
                     name="image_url"
-                    image={values.image_url ? { uri: values.image_url } : Avatar}
+                    image={{ uri: values.image_url ? values.image_url : '' }}
                     setFieldValue={setFieldValue}
                     icon="camera"
                     colorIcon={COLORS.primaryPurple4}
@@ -138,7 +146,7 @@ function ChangeProfile({ navigation }) {
                   )}
                   <CustomButton
                     onPress={handleSubmit}
-                    title={t('changeProfileTitle')}
+                    title={!data ? t('completeProfileTitle') : t('changeProfileTitle')}
                     buttonStyle={{ marginTop: SIZES.padding5 }}
                     enabled={isValid && !errors.full_name
                   && !errors.city && !errors.address && !errors.phone_number}
